@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, RankNTypes, TypeInType #-}
+{# LANGUAGE DataKinds, TypeFamilies, GADTs, RankNTypes, TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
@@ -46,8 +46,12 @@ append Nil ys = ys
 append (Cons x xs) ys = Cons x (append xs ys)
 
 {- This implimentation is buggy, and won't compile, but the thing to remember here is 
-   n is assummed as type Variable whose type is Type
-    • Expected kind ‘Nat’, but ‘n’ has kind ‘*’ 
+   n can be Z or (Succ n) appearing in type level, and there is no constructor to 
+   construct element of type Z, and element of type (Succ n). 
+   If you look at the implementation of SNat, then we have two constructors 
+   SZ : SNat Z
+   SSuc  to construct SNat (Succ n).  Now we can inspect n by pattern matching on SNat n. 
+
 fromList :: n  -> [a] -> Vector a n
 fromList Z [] = Nil
 fromList (Succ n) (x : xs) = Cons x (fromList xs) -}
