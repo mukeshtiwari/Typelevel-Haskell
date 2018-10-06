@@ -63,9 +63,42 @@ fromList :: forall (n :: Nat). SNat n -> forall (a :: Type). [a] -> Vector a n
 fromList SZero [] = Nil
 fromList (SSuc n) (x : xs) = Cons x (fromList n xs)
 
+{- 
+
+*Main> fromList SZero [1]
+*** Exception: /Users/keep_learning/Mukesh/Github/Typelevel-Haskell/Dephaskell.hs:(63,1)-(64,51): Non-exhaustive patterns in function fromList
+
+*Main> fromList SZero []
+Nil
+
+*Main> fromList (SSuc (SSuc SZero)) [1,2,3]
+Cons 1 (Cons 2 *** Exception: /Users/keep_learning/Mukesh/Github/Typelevel-Haskell/Dephaskell.hs:(63,1)-(64,51): Non-exhaustive patterns in function fromList
+
+*Main> fromList (SSuc (SSuc SZero)) [1,2]
+Cons 1 (Cons 2 Nil) -}
 
 
+replicateVec :: forall (n :: Nat). SNat n -> forall (a :: Type). a -> Vector a n
+replicateVec SZero _ = Nil
+replicateVec (SSuc n) a = Cons a (replicateVec n a)
 
+zipWithSame :: forall (n :: Nat) a b c . (a -> b -> c) -> Vector a n -> Vector b n -> Vector c n
+zipWithSame f Nil Nil = Nil
+zipWithSame f (Cons x xs) (Cons y ys) = Cons (f x y) (zipWithSame f xs ys)
+
+
+type family Min (a :: Nat) (b :: Nat) :: Nat where
+   Min Z Z = Z
+   Min Z (Succ b) = Z
+   Min (Succ a) Z = Z
+   Min (Succ a) (Succ b) = Succ (Min a b)
+
+
+zipWithDiff :: forall n m a b c. (a -> b -> c) -> Vector a n -> Vector b m -> Vector c (Min n m)
+zipWithDiff f Nil Nil = Nil
+zipWithDiff f Nil (Cons _ _) = Nil
+zipWithDiff f (Cons _ _) Nil = Nil
+zipWithDiff f (Cons x xs) (Cons y ys) = Cons (f x y) (zipWithDiff f xs ys)
 
 
 
