@@ -1,8 +1,9 @@
-{# LANGUAGE DataKinds, TypeFamilies, GADTs, RankNTypes, TypeInType #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, RankNTypes, TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
 import Data.Kind (Type)
+import GHC.TypeLits (Symbol, someSymbolVal)
 
 data Nat = Z | Succ Nat
 
@@ -103,6 +104,45 @@ zipWithDiff f Nil Nil = Nil
 zipWithDiff f Nil (Cons _ _) = Nil
 zipWithDiff f (Cons _ _) Nil = Nil
 zipWithDiff f (Cons x xs) (Cons y ys) = Cons (f x y) (zipWithDiff f xs ys)
+
+
+
+
+
+
+
+data Tag = Hdf5 | Cbf | Unchecked
+
+data A :: Tag -> Type where 
+  Ca :: Symbol -> A Unchecked
+  Ch :: A Hdf5
+  Cb :: A Cbf
+
+type family Typestring (a :: A Unchecked) :: Type 
+type instance Typestring (Ca "hdf5") = A Hdf5
+type instance Typestring (Ca "cbf") = A Cbf
+
+data SUnchecked a where
+  Sh :: SUnchecked (Ca "hdf5")
+  Sc :: SUnchecked (Ca "cbf")
+
+
+checkValue :: forall (a :: A Unchecked). A Unchecked ->  SUnchecked a -> Typestring a
+checkValue  (Ca x) Sh = Ch
+checkValue  (Ca x) Sc = Cb
+
+
+{- 
+ Now what I want is 
+ checkValue :: forall (a :: A Unchecked). SUnchecked a => A Unchecked -> Typestring a
+ checkValue (Ca "hdf5") = Ch
+ checkValue (Ca "cbf") = Cb 
+but the problem is I can't do pattern matching on symbols. If I change the data type to String from Symbol then it won't compile -}  
+
+
+
+
+
 
 
 
