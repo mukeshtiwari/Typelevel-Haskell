@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, RankNTypes, TypeInType #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
@@ -26,9 +26,55 @@ toList :: Vector a n -> [a]
 toList Nil = []
 toList (Cons x xs) = x : toList xs
 
-head :: Vector a (Succ n) -> a
-head (Cons x _) = x
+heaD :: Vector a (Succ n) -> a
+heaD (Cons x _) = x
 
-tail :: Vector a (Succ n) -> Vector a n
-tail (Cons x xs) = xs
+taiL :: Vector a (Succ n) -> Vector a n
+taiL (Cons x xs) = xs
+
+
+main :: IO ()
+main = do
+  print $ heaD (Cons 1 (Cons 2 Nil))
+  print $ taiL (Cons 1 (Cons 2 Nil))
+  -- | Uncommenting the line below causes type error
+  -- print $ head Nil
+-- /show
+
+append :: Vector a n -> Vector a m -> Vector a (Add n m)
+append Nil ys = ys
+append (Cons x xs) ys = Cons x (append xs ys)
+
+{- This implimentation is buggy, and won't compile, but the thing to remember here is 
+   n is assummed as type Variable whose type is Type
+    • Expected kind ‘Nat’, but ‘n’ has kind ‘*’ 
+fromList :: n  -> [a] -> Vector a n
+fromList Z [] = Nil
+fromList (Succ n) (x : xs) = Cons x (fromList xs) -}
+
+
+
+data SNat :: Nat -> Type where
+  SZero :: SNat Z
+  SSuc  :: SNat n -> SNat (Succ n)
+
+{- This code still does not give perfect Sigma types. You can pass two different parameters -}
+fromList :: forall (n :: Nat). SNat n -> forall (a :: Type). [a] -> Vector a n
+fromList SZero [] = Nil
+fromList (SSuc n) (x : xs) = Cons x (fromList n xs)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
