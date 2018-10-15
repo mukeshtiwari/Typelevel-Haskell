@@ -1,6 +1,9 @@
 module Ast (PExpr (..))where
 
-data PExpr = Var String 
+data PExpr = 
+   Top 
+   | Bottom
+   | Var String 
    | Not PExpr
    | And PExpr PExpr
    | Or PExpr PExpr
